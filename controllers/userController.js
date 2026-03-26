@@ -1,4 +1,6 @@
 const userService = require('../services/userService')
+const { userSchema } = require('../validators/userManageValidator')
+const { writeLog } = require('../utils/fileLogger')
 
 exports.getAllUsers = async (req, res) => {
   const data = await userService.getAllUsers()
@@ -12,11 +14,18 @@ exports.getUserById = async (req, res) => {
 }
 
 exports.createUser = async (req, res) => {
+  const { error } = userSchema.validate(req.body)
+  if (error) return res.status(400).json({ error: error.details[0].message })
+
   const data = await userService.createUser(req.body)
+  writeLog(`User created: ${JSON.stringify(data)}`)
   res.status(201).json(data)
 }
 
 exports.updateUser = async (req, res) => {
+  const { error } = userSchema.validate(req.body)
+  if (error) return res.status(400).json({ error: error.details[0].message })
+
   const data = await userService.updateUser(req.params.id, req.body)
   if (!data) return res.status(404).json({ error: "User not found" })
   res.json(data)
