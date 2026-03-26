@@ -1,16 +1,16 @@
 const express = require("express")
-const taskRoutes = require("./routes/taskRoutes")
+const userApiRoutes = require("./routes/userApiRoutes")
 
 const app = express()
 
 app.use(express.json())
 
-app.use("/api", taskRoutes)
+app.use("/api", userApiRoutes)
 
 app.use(express.static("public"))
 
 app.get("/", (req, res) => {
-  res.send("Task API running")
+  res.send("User Management API running")
 })
 
 const PORT = 3000
