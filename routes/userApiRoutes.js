@@ -6,6 +6,10 @@ const userController = require("../controllers/userController")
 const profileController = require("../controllers/profileController")
 const addressController = require("../controllers/addressController")
 const companyController = require("../controllers/companyController")
+const roleController = require('../controllers/roleController')
+
+router.post('/roles', roleController.createRole)
+router.post('/assign-role', roleController.assignRole)
 
 router.post("/users", userController.createUser)
 router.get("/users", userController.getAllUsers)
