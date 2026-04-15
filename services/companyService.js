@@ -1,35 +1,26 @@
-const db = require('../config/db')
+const { Company } = require("../models")
+
+exports.createCompany = async (data) => {
+  return await Company.create(data)
+}
 
 exports.getAllCompanies = async () => {
-  const [rows] = await db.execute("SELECT * FROM companies")
-  return rows
+  return await Company.findAll()
 }
 
 exports.getCompanyById = async (id) => {
-  const [rows] = await db.execute("SELECT * FROM companies WHERE id=?", [id])
-  return rows[0]
-}
-
-exports.createCompany = async (data) => {
-  const [result] = await db.execute(
-    "INSERT INTO companies (name) VALUES (?)",
-    [data.name]
-  )
-
-  return { id: result.insertId, ...data }
+  return await Company.findByPk(id)
 }
 
 exports.updateCompany = async (id, data) => {
-  const [result] = await db.execute(
-    "UPDATE companies SET name=? WHERE id=?",
-    [data.name ?? null, id]
-  )
-
-  if (result.affectedRows === 0) return null
-  return { id, ...data }
+  const company = await Company.findByPk(id)
+  if (!company) return null
+  return await company.update(data)
 }
 
 exports.deleteCompany = async (id) => {
-  const [result] = await db.execute("DELETE FROM companies WHERE id=?", [id])
-  return result.affectedRows > 0
+  const company = await Company.findByPk(id)
+  if (!company) return false
+  await company.destroy()
+  return true
 }

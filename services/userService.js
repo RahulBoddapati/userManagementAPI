@@ -1,46 +1,53 @@
-const db = require('../config/db')
+const { User } = require("../models")
+const crypto = require("crypto")
 
+exports.createUser = async (data) => {
+  if (!data.password || data.password.length < 6) {
+    throw new Error("Password must be at least 6 characters")
+  }
+
+  const token = crypto
+    .createHash("sha256")
+    .update(data.password)
+    .digest("hex")
+
+  return await User.create({
+    ...data,
+    token
+  })
+}
+
+exports.getUserByToken = async (token) => {
+  return await User.findOne({ where: { token } })
+}
 exports.getAllUsers = async () => {
-  const [rows] = await db.execute("SELECT * FROM users")
-  return rows
+  const users = await User.findAll()
+
+  return users.map(u => {
+    const { password, token, ...safeUser } = u.toJSON()
+    return safeUser
+  })
 }
 
 exports.getUserById = async (id) => {
-  const [rows] = await db.execute("SELECT * FROM users WHERE id=?", [id])
-  return rows[0]
-}
+  const user = await User.findByPk(id)
+  if (!user) return null
 
-exports.createUser = async (data) => {
-  const [result] = await db.execute(
-    "INSERT INTO users (company_id, email, password, phone) VALUES (?, ?, ?, ?)",
-    [
-      data.company_id ?? null,
-      data.email,
-      data.password,
-      data.phone ?? null
-    ]
-  )
-
-  return { id: result.insertId, ...data }
+  const { password, token, ...safeUser } = user.toJSON()
+  return safeUser
 }
 
 exports.updateUser = async (id, data) => {
-  const [result] = await db.execute(
-    "UPDATE users SET company_id=?, email=?, password=?, phone=? WHERE id=?",
-    [
-      data.company_id ?? null,
-      data.email ?? null,
-      data.password ?? null,
-      data.phone ?? null,
-      id
-    ]
-  )
-
-  if (result.affectedRows === 0) return null
-  return { id, ...data }
+  const user = await User.findByPk(id)
+  if (!user) return null
+  return await user.update(data)
 }
 
 exports.deleteUser = async (id) => {
-  const [result] = await db.execute("DELETE FROM users WHERE id=?", [id])
-  return result.affectedRows > 0
+  const user = await User.findByPk(id)
+  if (!user) return false
+  await user.destroy()
+  return true
 }
+
+//g app password: eqwo uqyq xebh vxfq

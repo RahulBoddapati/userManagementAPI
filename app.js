@@ -1,11 +1,12 @@
 const express = require("express")
-const userApiRoutes = require("./routes/userApiRoutes")
+const routes = require("./routes/userApiRoutes")
+const { sequelize } = require("./models")
 
 const app = express()
 
 app.use(express.json())
 
-app.use("/api", userApiRoutes)
+app.use("/api", routes)
 
 app.use(express.static("public"))
 
@@ -13,8 +14,8 @@ app.get("/", (req, res) => {
   res.send("User Management API running")
 })
 
-const PORT = 3000
-
-app.listen(PORT, () => {
-  console.log(`Server has started and is running on port ${PORT}`)
+sequelize.sync({ alter: true }).then(() => {
+  app.listen(3000, () => {
+    console.log("Server running on port 3000")
+  })
 })

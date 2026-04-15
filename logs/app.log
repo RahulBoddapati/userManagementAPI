@@ -1,1 +1,15 @@
 [2026-03-26T09:23:22.272Z] User created: {"id":7,"email":"rahul32@example.com","password":"123456","phone":"9876543210"}
+[2026-04-02T08:39:44.514Z] Company created: {"id":2,"name":"TestCorp"}
+[2026-04-02T08:45:53.242Z] User created: {"id":8,"company_id":2,"email":"rahul@test.com","password":"123456","phone":"9876543210"}
+[2026-04-02T08:57:22.837Z] Profile created: {"id":1,"user_id":5,"first_name":"Rahul","last_name":"B","dob":"2000-01-01T00:00:00.000Z"}
+[2026-04-02T08:57:39.429Z] Address created: {"id":1,"user_id":5,"street":"Main St","city":"Hyderabad","state":"Telangana","zip_code":"500001"}
+[2026-04-02T08:58:03.665Z] Address created: {"id":2,"user_id":5,"street":"Main Street","city":"Hyderabad","state":"Telangana","zip_code":"500001"}
+[2026-04-02T08:58:07.786Z] Address created: {"id":3,"user_id":5,"street":"Main Street","city":"Hydeabad","state":"Telangana","zip_code":"500001"}
+[2026-04-02T08:58:10.300Z] Address created: {"id":4,"user_id":5,"street":"Main Street","city":"Hydeabad","state":"Telangana","zip_code":"50001"}
+[2026-04-09T07:02:39.600Z] User created: {"id":9,"company_id":2,"email":"rahul@test.com","password":"123456","phone":"9876543210","token":"8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"}
+[2026-04-09T08:20:41.243Z] User created: {"id":1,"email":"rahul@test.com","password":"123456","phone":"9876543210","token":"8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"}
+[2026-04-09T08:22:05.263Z] User created: {"id":2,"email":"rahulaaa@test.com","password":"1231456","phone":"9876543210"}
+[2026-04-09T08:29:11.113Z] User created: {"id":1,"email":"admin@test.com","password":"123456","token":"8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"}
+[2026-04-09T08:33:59.005Z] User created: {"id":1,"email":"admin@test.com","password":"123456","token":"8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"}
+[2026-04-09T08:50:53.843Z] User created: {"id":1,"email":"admin@test.com","password":"123456","token":"8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"}
+[2026-04-09T08:57:47.604Z] User created: {"id":6,"email":"admina@test.com","password":"123456","token":"8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"}

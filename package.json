@@ -12,7 +12,9 @@
   "dependencies": {
     "express": "^5.2.1",
     "joi": "^18.0.2",
-    "mysql2": "^3.19.1"
+    "mysql2": "^3.19.1",
+    "nodemailer": "^8.0.5",
+    "sequelize": "^6.37.8"
   },
   "type": "commonjs"
 }

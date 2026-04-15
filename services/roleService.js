@@ -1,29 +1,25 @@
-const db = require('../config/db')
+const { Role, User } = require("../models")
 
 exports.createRole = async (name) => {
-  const [result] = await db.execute(
-    "INSERT INTO roles (name) VALUES (?)",
-    [name]
-  )
-  return { id: result.insertId, name }
+  return await Role.create({ name })
+}
+
+exports.getAllRoles = async () => {
+  return await Role.findAll()
 }
 
 exports.assignRole = async (user_id, role_id) => {
-  await db.execute(
-    "INSERT INTO user_roles (user_id, role_id) VALUES (?, ?)",
-    [user_id, role_id]
-  )
+  const user = await User.findByPk(user_id)
+  const role = await Role.findByPk(role_id)
+
+  if (!user || !role) return null
+
+  await user.addRole(role)
   return { user_id, role_id }
 }
 
 exports.getUserRoles = async (user_id) => {
-  const [rows] = await db.execute(
-    `SELECT r.name
-     FROM roles r
-     JOIN user_roles ur ON r.id = ur.role_id
-     WHERE ur.user_id = ?`,
-    [user_id]
-  )
-
-  return rows.map(r => r.name)
+  const user = await User.findByPk(user_id, { include: Role })
+  if (!user) return []
+  return user.Roles.map(r => r.name)
 }

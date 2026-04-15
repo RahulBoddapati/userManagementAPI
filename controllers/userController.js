@@ -1,6 +1,9 @@
 const userService = require('../services/userService')
 const { userSchema } = require('../validators/userManageValidator')
 const { writeLog } = require('../utils/fileLogger')
+const emailService = require("../services/emailService")
+const crypto = require("crypto")
+const { User } = require("../models")
 
 exports.getAllUsers = async (req, res) => {
   const data = await userService.getAllUsers()
@@ -14,12 +17,18 @@ exports.getUserById = async (req, res) => {
 }
 
 exports.createUser = async (req, res) => {
-  const { error } = userSchema.validate(req.body)
-  if (error) return res.status(400).json({ error: error.details[0].message })
+  try {
+    const user = await userService.createUser(req.body)
 
-  const data = await userService.createUser(req.body)
-  writeLog(`User created: ${JSON.stringify(data)}`)
-  res.status(201).json(data)
+    const safeUser = {
+      id: user.id,
+      email: user.email,
+      phone: user.phone
+    }
+    res.json(safeUser)
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
 }
 
 exports.updateUser = async (req, res) => {
@@ -35,4 +44,53 @@ exports.deleteUser = async (req, res) => {
   const success = await userService.deleteUser(req.params.id)
   if (!success) return res.status(404).json({ error: "User not found" })
   res.json({ message: "User deleted" })
+}
+
+exports.resetPassword = async (req, res) => {
+  try {
+    const { email } = req.body
+
+    const user = await User.findOne({ where: { email } })
+    if (!user) return res.status(404).json({ error: "User not found" })
+
+    await emailService.sendEmail(
+      email,
+      "Reset Password",
+      "You requested a password reset."
+    )
+
+    res.json({ message: "Email sent" })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
+}
+
+exports.changePassword = async (req, res) => {
+  try {
+    const { newPassword } = req.body
+
+    if (!newPassword || newPassword.length < 6) {
+      return res.status(400).json({ error: "Password too short" })
+    }
+
+    const token = crypto
+      .createHash("sha256")
+      .update(newPassword)
+      .digest("hex")
+
+    await req.user.update({
+      password: newPassword,
+      token
+    })
+
+    await emailService.sendEmail(
+      req.user.email,
+      "Password Changed",
+      "Your password was updated."
+    )
+
+    res.json({ message: "Password updated" })
+  } catch (err) {
+    res.status(500).json({ error: err.message })
+  }
 }
