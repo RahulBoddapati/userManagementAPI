@@ -9,29 +9,34 @@ const addressController = require("../controllers/addressController")
 const companyController = require("../controllers/companyController")
 const roleController = require('../controllers/roleController')
 const taskController = require("../controllers/taskController")
+const authController = require("../controllers/authController")
+const adminController = require("../controllers/adminController")
 
 router.post(
   "/tasks",
   authenticate,
-  authorize(["admin", "manager"]),
+  authorize("create_task"),
   taskController.createTask
 )
 
 router.get(
   "/tasks",
   authenticate,
+  authorize("view_tasks"),
   taskController.getTasks
 )
 
 router.put(
   "/tasks/:id/status",
   authenticate,
+  authorize("update_task"),
   taskController.updateStatus
 )
 
 router.delete(
   "/tasks/:id",
   authenticate,
+  authorize("delete_task"),
   taskController.deleteTask
 )
 
@@ -66,6 +71,12 @@ router.get("/companies", companyController.getAllCompanies)
 router.get("/companies/:id", companyController.getCompanyById)
 router.put("/companies/:id", companyController.updateCompany)
 router.delete("/companies/:id", companyController.deleteCompany)
+
+router.post("/login", authController.login)
+
+router.post("/permissions", adminController.createPermission)
+router.post("/assign-permission", adminController.assignPermissionToRole)
+router.post("/assign-role", adminController.assignRoleToUser)
 
 router.post("/reset-password", userController.resetPassword)
 

@@ -1,4 +1,5 @@
 const roleService = require('../services/roleService')
+const { UserRole } = require("../models")
 
 exports.createRole = async (req, res) => {
   const data = await roleService.createRole(req.body.name)
@@ -6,7 +7,21 @@ exports.createRole = async (req, res) => {
 }
 
 exports.assignRole = async (req, res) => {
-  const { user_id, role_id } = req.body
-  const data = await roleService.assignRole(user_id, role_id)
-  res.json(data)
+  try {
+    const { userId, roleId } = req.body
+
+    const record = await UserRole.create({
+      user_id: userId,
+      role_id: roleId
+    })
+
+    res.json({
+      message: "Role assigned",
+      data: record
+    })
+
+  } catch (err) {
+    console.error(err)
+    res.status(500).json({ error: err.message })
+  }
 }

@@ -1,48 +1,49 @@
-const userService = require("../services/userService")
+const jwt = require("jsonwebtoken")
+const config = require("../config/jwt")
 const roleService = require("../services/roleService")
+const permissionService = require("../services/permissionService")
 
 exports.authenticate = async (req, res, next) => {
-  const token = req.headers["token"]
+  try {
+    const token = req.headers["authorization"]
 
-  if (!token) {
-    return res.status(401).json({ error: "Token required" })
-  }
-
-  const user = await userService.getUserByToken(token)
-
-  if (!user) {
-    return res.status(401).json({ error: "Invalid token" })
-  }
-
-  req.user = user
-  next()
-}
-
-exports.authorize = (allowedRoles) => {
-  return async (req, res, next) => {
-    if (!req.user) {
-      return res.status(401).json({ error: "Unauthorized" })
+    if (!token) {
+      return res.status(401).json({ error: "Token required" })
     }
 
-    const roles = await roleService.getUserRoles(req.user.id)
+    const decoded = jwt.verify(token, config.secret)
 
-    const hasAccess = roles.some(r => allowedRoles.includes(r))
-
-    if (!hasAccess) {
-      return res.status(403).json({ error: "Forbidden" })
+    req.user = {
+      id: decoded.userId
     }
 
     next()
+
+  } catch (err) {
+    return res.status(401).json({ error: "Invalid token" })
   }
 }
 
-//Add Token Authentication and Introduce password retriction for token
 
-//Generate token based on password, the same token is used for all usage of a user
-// as you should extract the token and get the user_id from it
+exports.authorize = (permissionName) => {
+  return async (req, res, next) => {
+    try {
+      const roles = await roleService.getUserRoles(req.user.id)
 
-//Setup EmailService
-//Use the Service for reset password and new password emails
+      if (!roles.length) {
+        return res.status(403).json({ error: "Forbidden" })
+      }
 
-//Integrate TaskManagement with UserManagement based on the User role
-// (Ex: Admin can assign a task, others can add comments, change status, and close the task) similar to a pull request
+      const permissions = await permissionService.getPermissionsByRoles(roles)
+
+      if (!permissions.includes(permissionName)) {
+        return res.status(403).json({ error: "Forbidden" })
+      }
+
+      next()
+
+    } catch (err) {
+      return res.status(500).json({ error: err.message })
+    }
+  }
+}

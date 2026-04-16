@@ -1,4 +1,4 @@
-const { Role, User } = require("../models")
+const { Role, User, UserRole } = require("../models")
 
 exports.createRole = async (name) => {
   return await Role.create({ name })
@@ -18,8 +18,16 @@ exports.assignRole = async (user_id, role_id) => {
   return { user_id, role_id }
 }
 
-exports.getUserRoles = async (user_id) => {
-  const user = await User.findByPk(user_id, { include: Role })
-  if (!user) return []
-  return user.Roles.map(r => r.name)
+exports.getUserRoles = async (userId) => {
+  const userRoles = await UserRole.findAll({
+    where: { user_id: userId }
+  })
+
+  const roleIds = userRoles.map(r => r.role_id)
+
+  const roles = await Role.findAll({
+    where: { id: roleIds }
+  })
+
+  return roles.map(r => r.name)
 }
