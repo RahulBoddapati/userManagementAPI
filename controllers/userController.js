@@ -47,22 +47,17 @@ exports.deleteUser = async (req, res) => {
 }
 
 exports.resetPassword = async (req, res) => {
-  try {
-    const { email } = req.body
+  const { token, newPassword } = req.body
 
-    const user = await User.findOne({ where: { email } })
-    if (!user) return res.status(404).json({ error: "User not found" })
+  const user = await User.findOne({ where: { resetToken: token } })
+  if (!user) return res.status(400).json({ error: "Invalid token" })
 
-    await emailService.sendEmail(
-      email,
-      "Reset Password",
-      "You requested a password reset."
-    )
+  await user.update({
+    password: newPassword,
+    resetToken: null
+  })
 
-    res.json({ message: "Email sent" })
-  } catch (err) {
-    res.status(500).json({ error: err.message })
-  }
+  res.json({ message: "Password updated" })
 }
 
 exports.changePassword = async (req, res) => {
@@ -93,4 +88,42 @@ exports.changePassword = async (req, res) => {
   } catch (err) {
     res.status(500).json({ error: err.message })
   }
+}
+
+exports.forgotPassword = async (req, res) => {
+  const { email } = req.body
+
+  const user = await User.findOne({ where: { email } })
+  if (!user) return res.status(404).json({ error: "User not found" })
+
+  const token = require("crypto").randomBytes(32).toString("hex")
+
+  await user.update({ resetToken: token })
+
+  await emailService.sendEmail(
+    email,
+    "Reset Password",
+    `New Token To Reset=${token}`
+  )
+
+  res.json({ message: "Reset email sent" })
+}
+
+exports.verifyUser = async (req, res) => {
+  const { token } = req.query
+
+  const user = await User.findOne({
+    where: { verificationToken: token }
+  })
+
+  if (!user) {
+    return res.status(400).json({ error: "Invalid token" })
+  }
+
+  await user.update({
+    status: "active",
+    verificationToken: null
+  })
+
+  res.send("Account verified successfully")
 }

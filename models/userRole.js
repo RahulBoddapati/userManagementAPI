@@ -14,6 +14,6 @@ module.exports = (sequelize) => {
     }
   }, {
     tableName: "user_roles",
-    timestamps: false
+    timestamps: true
   })
 }

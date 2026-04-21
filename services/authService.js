@@ -8,6 +8,10 @@ exports.login = async (email, password) => {
   if (!user || user.password !== password) {
     throw new Error("Invalid credentials")
   }
+  
+  if (user.status !== "active") {
+    throw new Error("Cannot Login, User Not Verified")
+  }
 
   const token = jwt.sign(
     { userId: user.id },

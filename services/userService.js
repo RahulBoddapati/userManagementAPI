@@ -1,20 +1,39 @@
-const { User } = require("../models")
+const { User, Role, UserRole } = require("../models")
 const crypto = require("crypto")
+const emailService = require("./emailService")
 
 exports.createUser = async (data) => {
   if (!data.password || data.password.length < 6) {
     throw new Error("Password must be at least 6 characters")
   }
 
-  const token = crypto
-    .createHash("sha256")
-    .update(data.password)
-    .digest("hex")
+  const verificationToken = crypto.randomBytes(32).toString("hex")
 
-  return await User.create({
+  const user = await User.create({
     ...data,
-    token
+    status: "pending",
+    verificationToken
   })
+
+  const staffRole = await Role.findOne({ where: { name: "staff" } })
+
+  await UserRole.create({
+    user_id: user.id,
+    role_id: staffRole.id
+  })
+
+  await emailService.sendEmail(
+    user.email,
+    "Verify Account",
+    `
+      <p>Click to verify your account:</p>
+      <a href="http://localhost:3000/api/verify?token=${verificationToken}">
+        Verify Account
+      </a>
+    `
+  )
+
+  return user
 }
 
 exports.getUserByToken = async (token) => {
