@@ -12,7 +12,8 @@ module.exports = (sequelize) => {
       defaultValue: "pending"
     },
     verificationToken: DataTypes.STRING,
-    resetToken: DataTypes.STRING
+    otp: DataTypes.STRING,
+    otpExpiry: DataTypes.DATE
   }, {
       timestamps: false
   })

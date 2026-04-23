@@ -47,17 +47,22 @@ exports.deleteUser = async (req, res) => {
 }
 
 exports.resetPassword = async (req, res) => {
-  const { token, newPassword } = req.body
+  const { email, otp, newPassword } = req.body
 
-  const user = await User.findOne({ where: { resetToken: token } })
-  if (!user) return res.status(400).json({ error: "Invalid token" })
+  const user = await User.findOne({ where: { email } })
+  if (!user) return res.status(404).json({ error: "User not found" })
+
+  if (user.otp !== otp || new Date() > user.otpExpiry) {
+    return res.status(400).json({ error: "Invalid or expired OTP" })
+  }
 
   await user.update({
     password: newPassword,
-    resetToken: null
+    otp: null,
+    otpExpiry: null
   })
 
-  res.json({ message: "Password updated" })
+  res.json({ message: "Password reset successful" })
 }
 
 exports.changePassword = async (req, res) => {
@@ -92,21 +97,22 @@ exports.changePassword = async (req, res) => {
 
 exports.forgotPassword = async (req, res) => {
   const { email } = req.body
-
   const user = await User.findOne({ where: { email } })
+
   if (!user) return res.status(404).json({ error: "User not found" })
 
-  const token = require("crypto").randomBytes(32).toString("hex")
+  const otp = Math.floor(100000 + Math.random() * 900000).toString()
+  const expiry = new Date(Date.now() + 10 * 60 * 1000)
 
-  await user.update({ resetToken: token })
+  await user.update({ otp, otpExpiry: expiry })
 
   await emailService.sendEmail(
     email,
-    "Reset Password",
-    `New Token To Reset=${token}`
+    "Your OTP",
+    `Your OTP is: ${otp} (valid for 10 minutes)`
   )
 
-  res.json({ message: "Reset email sent" })
+  res.json({ message: "OTP sent" })
 }
 
 exports.verifyUser = async (req, res) => {

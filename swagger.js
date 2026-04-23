@@ -1,9 +1,22 @@
-const swaggerJSDoc = require("swagger-jsdoc")
+const swaggerJsdoc = require("swagger-jsdoc")
 
-module.exports = swaggerJSDoc({
+const options = {
   definition: {
     openapi: "3.0.0",
-    info: { title: "API", version: "1.0.0" }
+    info: {
+      title: "User API",
+      version: "1.0.0",
+      description: "Simple API for testing Swagger",
+    },
+    servers: [
+      {
+        url: "http://localhost:3000",
+      },
+    ],
   },
-  apis: ["./routes/*.js"]
-})
+  apis: ["./routes/*.js"],
+}
+
+const swaggerSpec = swaggerJsdoc(options)
+
+module.exports = swaggerSpec
