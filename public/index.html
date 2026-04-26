@@ -1,0 +1,123 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Task App</title>
+</head>
+<body>
+
+<!-- LOGIN -->
+<div id="loginSection">
+  <h2>Login</h2>
+  <input id="email" placeholder="Email"><br><br>
+  <input id="password" type="password" placeholder="Password"><br><br>
+  <button onclick="login()">Login</button>
+</div>
+
+<!-- APP (HIDDEN INITIALLY) -->
+<div id="appSection" style="display:none;">
+  <h2>Tasks</h2>
+
+  <!-- CREATE TASK (ADMIN ONLY) -->
+  <div id="createTaskSection" style="display:none;">
+    <input id="title" placeholder="Task Title">
+    <button onclick="createTask()">Create Task</button>
+  </div>
+
+  <ul id="taskList"></ul>
+</div>
+
+<script>
+const API = "http://localhost:3000";
+
+function getToken() {
+  return localStorage.getItem("token");
+}
+
+function getRole() {
+  return localStorage.getItem("role");
+}
+
+async function login() {
+  const email = document.getElementById("email").value;
+  const password = document.getElementById("password").value;
+
+  const res = await fetch(`${API}/api/login`, {
+    method: "POST",
+    headers: {"Content-Type": "application/json"},
+    body: JSON.stringify({ email, password })
+  });
+
+  const data = await res.json();
+
+  if (!res.ok) {
+    alert(data.error || "Login failed");
+    return;
+  }
+
+  // store auth
+  localStorage.setItem("token", data.token);
+  localStorage.setItem("role", data.user.role);
+
+  // switch UI
+  document.getElementById("loginSection").style.display = "none";
+  document.getElementById("appSection").style.display = "block";
+
+  loadTasks();
+}
+
+async function loadTasks() {
+  const res = await fetch(`${API}/api/tasks`, {
+    headers: {
+      "Authorization": "Bearer " + getToken()
+    }
+  });
+
+  if (!res.ok) {
+    alert("Failed to load tasks");
+    return;
+  }
+
+  const tasks = await res.json();
+
+  const list = document.getElementById("taskList");
+  list.innerHTML = "";
+
+  tasks.forEach(t => {
+    const li = document.createElement("li");
+    li.innerText = t.title;
+    list.appendChild(li);
+  });
+
+  // RBAC UI
+  const role = getRole();
+
+  // assuming role_id = 1 is admin
+  if (role == 1) {
+    document.getElementById("createTaskSection").style.display = "block";
+  }
+}
+
+async function createTask() {
+  const title = document.getElementById("title").value;
+
+  const res = await fetch(`${API}/api/tasks`, {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+      "Authorization": "Bearer " + getToken()
+    },
+    body: JSON.stringify({ title })
+  });
+
+  if (!res.ok) {
+    alert("Not allowed or invalid request");
+    return;
+  }
+
+  document.getElementById("title").value = "";
+  loadTasks();
+}
+</script>
+
+</body>
+</html>

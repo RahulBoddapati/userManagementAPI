@@ -3,12 +3,15 @@ const routes = require("./routes/userApiRoutes")
 const swaggerUi = require("swagger-ui-express")
 const swaggerSpec = require("./swagger")
 const { sequelize } = require("./models")
+const path = require("path");
 
 require("./cron")
 
 const app = express()
 
 app.use(express.json())
+
+app.use(express.static(path.join(__dirname, "public")));
 
 app.use("/api", routes)
 
