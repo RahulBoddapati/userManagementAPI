@@ -68,5 +68,3 @@ exports.deleteUser = async (id) => {
   await user.destroy()
   return true
 }
-
-//g app password: eqwo uqyq xebh vxfq

@@ -134,6 +134,3 @@ router.get('/logs', (req, res) => {
 })
 
 module.exports = router
-
-//Learn NoSQL(DynamoDB or MongoDB)
-//Use s3 Bucket in AWS for File Uploads(Profile Upload)
